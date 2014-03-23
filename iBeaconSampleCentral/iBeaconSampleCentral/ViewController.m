@@ -14,6 +14,7 @@
 @property (nonatomic) CLLocationManager *locationManager;
 @property (nonatomic) NSUUID *proximityUUID;
 @property (nonatomic) CLBeaconRegion *beaconRegion;
+@property (weak, nonatomic) IBOutlet UITextView *txtview;
 
 @end
 
@@ -160,7 +161,7 @@
 		}
 	}
     NSString *message = [NSString stringWithFormat:@"param:%@\njson:%@", mes,data_str];
-
+    self.txtview.text = message ;
     [self sendLocalNotificationForMessage:message];
 }
 

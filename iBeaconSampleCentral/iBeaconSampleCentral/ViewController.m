@@ -27,14 +27,16 @@
     if ([CLLocationManager isMonitoringAvailableForClass:[CLCircularRegion class]]) {
         self.locationManager = [CLLocationManager new];
         self.locationManager.delegate = self;
-        //# Estimote うまくいかない # D456894A-02F0-4CB0-8258-81C187DF45C2
-        //# ｘBeacon E2C56DB5-DFFB-48D2-B060-D0F5A71096E0
+        // iPhone/iPad App Storeのツールを利用
+        //# Estimote D456894A-02F0-4CB0-8258-81C187DF45C2 受信不可。uuidが違う可能性がある。
+        //# ｘBeacon E2C56DB5-DFFB-48D2-B060-D0F5A71096E0 OK。リストから選択
         //# ｘBeacon 5A4BCFCE-174E-4BAC-A814-092E77F6B7E5
         self.proximityUUID = [[NSUUID alloc] initWithUUIDString:@"E2C56DB5-DFFB-48D2-B060-D0F5A71096E0"];
         
         self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUID
                                                                identifier:@"jp.classmethod.testregion"];
         [self.locationManager startMonitoringForRegion:self.beaconRegion];
+        // self.txtview.text = [self.proximityUUID UUIDString];
     }
 }
 
@@ -96,8 +98,13 @@
         [self sendLocalNotificationForMessage:[rangeMessage stringByAppendingString:message]];
 
 
-        NSString *jsonstr = [NSString stringWithFormat:@"%@.json?major=%@&minor=%@&accuracy=%f&rssi=%ld",
-                             [self.proximityUUID UUIDString],nearestBeacon.major, nearestBeacon.minor, nearestBeacon.accuracy, (long)nearestBeacon.rssi];
+//        NSString *jsonstr = [NSString stringWithFormat:@"%@.json?major=%@&minor=%@&accuracy=%f&rssi=%ld",
+//                             [self.proximityUUID UUIDString],nearestBeacon.major, nearestBeacon.minor, nearestBeacon.accuracy, (long)nearestBeacon.rssi];
+        NSString *jsonstr = [NSString stringWithFormat:@"%@.json?proximity=%@&major=%@&minor=%@&accuracy=%f&rssi=%ld",
+                             [self.proximityUUID UUIDString], 
+                                    rangeMessage,
+                                    nearestBeacon.major, nearestBeacon.minor,
+                                    nearestBeacon.accuracy, (long)nearestBeacon.rssi];
         [self getJson: jsonstr] ;
     }
 }

@@ -36,7 +36,7 @@
         self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUID
                                                                identifier:@"jp.classmethod.testregion"];
         [self.locationManager startMonitoringForRegion:self.beaconRegion];
-        // self.txtview.text = [self.proximityUUID UUIDString];
+        self.txtview.text = [self.proximityUUID UUIDString];
     }
 }
 
@@ -100,11 +100,30 @@
 
 //        NSString *jsonstr = [NSString stringWithFormat:@"%@.json?major=%@&minor=%@&accuracy=%f&rssi=%ld",
 //                             [self.proximityUUID UUIDString],nearestBeacon.major, nearestBeacon.minor, nearestBeacon.accuracy, (long)nearestBeacon.rssi];
+
+        NSString *rangestr;
+        
+        switch (nearestBeacon.proximity) {
+            case CLProximityImmediate:
+                rangestr = @"Immediate";
+                break;
+            case CLProximityNear:
+                rangestr = @"Near";
+                break;
+            case CLProximityFar:
+                rangestr = @"Far";
+                break;
+            default:
+                rangestr = @"Unknown";
+                break;
+        }
+
         NSString *jsonstr = [NSString stringWithFormat:@"%@.json?proximity=%@&major=%@&minor=%@&accuracy=%f&rssi=%ld",
                              [self.proximityUUID UUIDString], 
-                                    rangeMessage,
+                                    rangestr,
                                     nearestBeacon.major, nearestBeacon.minor,
                                     nearestBeacon.accuracy, (long)nearestBeacon.rssi];
+        NSLog(@"DEBUG:%@",jsonstr);
         [self getJson: jsonstr] ;
     }
 }

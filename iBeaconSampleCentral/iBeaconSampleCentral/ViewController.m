@@ -16,6 +16,10 @@
 @property (nonatomic) CLBeaconRegion *beaconRegion;
 @property (weak, nonatomic) IBOutlet UITextView *txtview;
 
+// サンプルプログラム用
+@property (nonatomic) NSString *vendorUUID;       // device_id用
+@property (nonatomic) BOOL sendMode;              // device_id用
+
 @end
 
 @implementation ViewController
@@ -23,7 +27,11 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
+
+    // 広告トラッキング以外の用途に使用するUUID取得用メソッド
+    self.vendorUUID = [[UIDevice currentDevice].identifierForVendor UUIDString];
+    self.sendMode = YES ;
+
     if ([CLLocationManager isMonitoringAvailableForClass:[CLCircularRegion class]]) {
         self.locationManager = [CLLocationManager new];
         self.locationManager.delegate = self;
@@ -34,7 +42,7 @@
         self.proximityUUID = [[NSUUID alloc] initWithUUIDString:@"E2C56DB5-DFFB-48D2-B060-D0F5A71096E0"];
         
         self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUID
-                                                               identifier:@"jp.classmethod.testregion"];
+                                                               identifier:@"jp.co.hitachi-solutions.csv"];
         [self.locationManager startMonitoringForRegion:self.beaconRegion];
         self.txtview.text = [self.proximityUUID UUIDString];
     }
@@ -46,16 +54,49 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (IBAction)buttonReaction:(id)sender {
+    self.sendMode = YES ;
+}
+
 #pragma mark - CLLocationManagerDelegate methods
 
 - (void)locationManager:(CLLocationManager *)manager didStartMonitoringForRegion:(CLRegion *)region
 {
+	// ****************************************************************
+	// * Bug Fix : http://brightechno.com/blog/archives/220
+	// * 正しいビーコン監視の開始手順
+	// ここでiOS7から追加された”CLLocationManager requestStateForRegion:”を呼び出し、
+	// 現在自分が、iBeacon監視でどういう状態にいるかを知らせてくれるように要求します。
+	[self.locationManager requestStateForRegion:self.beaconRegion];
+	// ****************************************************************
     [self sendLocalNotificationForMessage:@"Start Monitoring Region"];
 }
+
+// ****************************************************************
+// * Bug Fix : http://brightechno.com/blog/archives/220
+// * 正しいビーコン監視の開始手順
+// requestStateForRegion によって、呼び出されるdelegate
+- (void)locationManager:(CLLocationManager *)manager didDetermineState:(CLRegionState)state forRegion:(CLRegion *)region
+{
+    switch (state) {
+    case CLRegionStateInside: // リージョン内にいる
+        if ([region isMemberOfClass:[CLBeaconRegion class]] && [CLLocationManager isRangingAvailable]) {
+            [self.locationManager startRangingBeaconsInRegion:self.beaconRegion];
+        }
+        break;
+    case CLRegionStateOutside:
+    case CLRegionStateUnknown:
+    default:
+        break;
+    }
+}
+// ****************************************************************
+
 
 - (void)locationManager:(CLLocationManager *)manager didEnterRegion:(CLRegion *)region
 {
     [self sendLocalNotificationForMessage:@"Enter Region"];
+//    self.sendMode = NO;
     
     if ([region isMemberOfClass:[CLBeaconRegion class]] && [CLLocationManager isRangingAvailable]) {
         [self.locationManager startRangingBeaconsInRegion:(CLBeaconRegion *)region];
@@ -65,6 +106,7 @@
 - (void)locationManager:(CLLocationManager *)manager didExitRegion:(CLRegion *)region
 {
     [self sendLocalNotificationForMessage:@"Exit Region"];
+    self.sendMode = YES;
     
     if ([region isMemberOfClass:[CLBeaconRegion class]] && [CLLocationManager isRangingAvailable]) {
         [self.locationManager stopRangingBeaconsInRegion:(CLBeaconRegion *)region];
@@ -97,34 +139,34 @@
                              nearestBeacon.major, nearestBeacon.minor, nearestBeacon.accuracy, (long)nearestBeacon.rssi];
         [self sendLocalNotificationForMessage:[rangeMessage stringByAppendingString:message]];
 
-
-//        NSString *jsonstr = [NSString stringWithFormat:@"%@.json?major=%@&minor=%@&accuracy=%f&rssi=%ld",
-//                             [self.proximityUUID UUIDString],nearestBeacon.major, nearestBeacon.minor, nearestBeacon.accuracy, (long)nearestBeacon.rssi];
-
-        NSString *rangestr;
+        if (self.sendMode == YES)
+        {
+            NSString *rangestr;
         
-        switch (nearestBeacon.proximity) {
-            case CLProximityImmediate:
-                rangestr = @"Immediate";
-                break;
-            case CLProximityNear:
-                rangestr = @"Near";
-                break;
-            case CLProximityFar:
-                rangestr = @"Far";
-                break;
-            default:
-                rangestr = @"Unknown";
-                break;
-        }
+            switch (nearestBeacon.proximity) {
+                case CLProximityImmediate:
+                    rangestr = @"Immediate";
+                    break;
+                case CLProximityNear:
+                    rangestr = @"Near";
+                    break;
+                case CLProximityFar:
+                    rangestr = @"Far";
+                    break;
+                default:
+                    rangestr = @"Unknown";
+                    break;
+            }
 
-        NSString *jsonstr = [NSString stringWithFormat:@"%@.json?proximity=%@&major=%@&minor=%@&accuracy=%f&rssi=%ld",
+            NSString *jsonstr = [NSString stringWithFormat:@"%@.json?proximity=%@&major=%@&minor=%@&accuracy=%f&rssi=%ld&device_id=%@",
                              [self.proximityUUID UUIDString], 
                                     rangestr,
                                     nearestBeacon.major, nearestBeacon.minor,
-                                    nearestBeacon.accuracy, (long)nearestBeacon.rssi];
-        NSLog(@"DEBUG:%@",jsonstr);
-        [self getJson: jsonstr] ;
+                                    nearestBeacon.accuracy, (long)nearestBeacon.rssi,
+                                    self.vendorUUID  ];
+            // NSLog(@"DEBUG:%@",jsonstr);
+            [self getJson: jsonstr] ;
+        }
     }
 }
 
@@ -161,10 +203,28 @@
 			otherButtonTitles : nil
 		];
 		[alert show];
-//		[alert release];
+		//[alert release];
 		return;
 	}
 
+    NSDictionary *jsonDictionary = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+    NSString *recieve_time  = [jsonDictionary objectForKey:@"recieve_time"];
+    NSString *uuid          = [jsonDictionary objectForKey:@"uuid"];
+    NSString *major         = [jsonDictionary objectForKey:@"major"];
+    NSString *minor         = [jsonDictionary objectForKey:@"minor"];
+    NSString *proximity     = [jsonDictionary objectForKey:@"proximity"];
+    NSString *accuracy      = [jsonDictionary objectForKey:@"accuracy"];
+    NSString *rssi          = [jsonDictionary objectForKey:@"rssi"];
+    NSString *deviceinfo    = [jsonDictionary objectForKey:@"deviceinfo"];
+    NSString *message       = [jsonDictionary objectForKey:@"message"];
+    NSString *cmd           = [jsonDictionary objectForKey:@"cmd"];
+    NSString *parameter     = [jsonDictionary objectForKey:@"parameter"];
+    NSString *device_id     = [jsonDictionary objectForKey:@"device_id"];
+    NSString *bm_message_id = [jsonDictionary objectForKey:@"bm_message_id"];
+/**************************************************************************************
+ **************************************************************************************/
+    //
+    // 文字コードを変換する
 	// response
 	int enc_arr[] = {
 		NSUTF8StringEncoding,			// UTF-8
@@ -186,11 +246,41 @@
 			break;
 		}
 	}
-    NSString *message = [NSString stringWithFormat:@"param:%@\njson:%@", mes,data_str];
-    self.txtview.text = message ;
-    [self sendLocalNotificationForMessage:message];
+    NSLog(@"retjson=%@¥n",data_str);
+    //NSString *textmessage = [NSString stringWithFormat:@"param:%@\njson:%@", mes,data_str];
+    NSString *textmessage = [NSString stringWithFormat:@"recieve_time:%@\nuuid:%@\nmajor:%@\nminor:%@\nproximity:%@\nacceracy:%@\nrssi:%@\ndevinfo:%@\nmessage:%@\ncmd:%@\nparameter:%@\ndevice_id:%@\nmessage_id:%@\n",
+                             recieve_time  ,
+                             uuid          ,
+                             major         ,
+                             minor         ,
+                             proximity     ,
+                             accuracy      ,
+                             rssi          ,
+                             deviceinfo    ,
+                             message       ,
+                             cmd           ,
+                             parameter     ,
+                             device_id     ,
+                             bm_message_id
+                             ];
+    self.txtview.text = textmessage ;
+    self.sendMode = NO;
+
+    if ( [cmd isEqualToString:@"url"]==YES )
+    {
+        //NSString *urlscheme = @"mailto:frank@wwdcdemo.example.com"; @"maps:" ;
+        NSString *urlscheme = parameter;
+        [self urlScheme: urlscheme] ;
+        // [self sendLocalNotificationForMessage:textmessage];
+    }
 }
 
+- (void)urlScheme:(NSString *)url
+{
+    NSLog(@"url:%@",url);
+    NSURL *myURL = [NSURL URLWithString: url];
+    [[UIApplication sharedApplication] openURL:myURL];
+}
 
 #pragma mark - Private methods
 

@@ -8,6 +8,3 @@
 @interface ViewController : UIViewController <UITextViewDelegate>
 
 @end
-
-@interface TextViewController : UIViewController <UITextViewDelegate>
-@end

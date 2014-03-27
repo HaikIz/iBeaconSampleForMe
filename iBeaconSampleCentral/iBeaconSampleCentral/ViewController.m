@@ -12,12 +12,13 @@
 @interface ViewController () <CLLocationManagerDelegate>
 
 @property (nonatomic) CLLocationManager *locationManager;
-@property (nonatomic) NSUUID *proximityUUID;
+@property (nonatomic) NSUUID *proximityUUIDmy;  // MyBeacon
+@property (nonatomic) NSUUID *proximityUUIDx; // xBeacon
 @property (nonatomic) CLBeaconRegion *beaconRegion;
 @property (weak, nonatomic) IBOutlet UITextView *txtview;
 
 // サンプルプログラム用
-@property (nonatomic) NSString *vendorUUID;       // device_id用
+@property (nonatomic) NSString *vendorUUID;       // device_id用 myBeacon
 @property (nonatomic) BOOL sendMode;              // device_id用
 
 @end
@@ -43,11 +44,17 @@
         //# Estimote D456894A-02F0-4CB0-8258-81C187DF45C2 受信不可。uuidが違う可能性がある。
         //# ｘBeacon E2C56DB5-DFFB-48D2-B060-D0F5A71096E0 OK。リストから選択
         //# ｘBeacon 5A4BCFCE-174E-4BAC-A814-092E77F6B7E5
-        self.proximityUUID = [[NSUUID alloc] initWithUUIDString:@"E2C56DB5-DFFB-48D2-B060-D0F5A71096E0"];
-        
+/*
+        self.proximityUUIDmy = [[NSUUID alloc] initWithUUIDString:@"00000000-8B46-1001-B000-0001C4DBB8E3"];
         self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUID
-                                                               identifier:@"jp.co.hitachi-solutions.csv"];
+                                                     identifier:@"jp.co.hitachi-solutions.csv.mybeacon"];
         [self.locationManager startMonitoringForRegion:self.beaconRegion];
+*/
+        self.proximityUUIDx = [[NSUUID alloc] initWithUUIDString:@"E2C56DB5-DFFB-48D2-B060-D0F5A71096E0"];
+        self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUID
+                                                     identifier:@"jp.co.hitachi-solutions.csv.xbeacon"];
+        [self.locationManager startMonitoringForRegion:self.beaconRegion];
+
         self.txtview.text = [self.proximityUUID UUIDString];
     }
 }
@@ -153,7 +160,8 @@
         }
         
         NSString *message = [NSString stringWithFormat:@"major:%@, minor:%@, accuracy:%f, rssi:%ld",
-                             nearestBeacon.major, nearestBeacon.minor, nearestBeacon.accuracy, (long)nearestBeacon.rssi];
+                             nearestBeacon.major, nearestBeacon.minor, nearestBeacon.accuracy,
+                             (long)nearestBeacon.rssi];
         [self sendLocalNotificationForMessage:[rangeMessage stringByAppendingString:message]];
 
         if (self.sendMode == YES)
@@ -176,7 +184,8 @@
             }
 
             NSString *jsonstr = [NSString stringWithFormat:@"%@.json?proximity=%@&major=%@&minor=%@&accuracy=%f&rssi=%ld&device_id=%@",
-                             [self.proximityUUID UUIDString], 
+                             // [self.proximityUUID UUIDString], 
+                                    [nearestBeacon.proximityUUID UUIDString],
                                     rangestr,
                                     nearestBeacon.major, nearestBeacon.minor,
                                     nearestBeacon.accuracy, (long)nearestBeacon.rssi,

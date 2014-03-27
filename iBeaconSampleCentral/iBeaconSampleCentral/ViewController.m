@@ -32,10 +32,14 @@
     self.vendorUUID = [[UIDevice currentDevice].identifierForVendor UUIDString];
     self.sendMode = YES ;
 
+    // キーボードを表示させない
+    self.txtview.delegate = self;
+    
     if ([CLLocationManager isMonitoringAvailableForClass:[CLCircularRegion class]]) {
         self.locationManager = [CLLocationManager new];
         self.locationManager.delegate = self;
         // iPhone/iPad App Storeのツールを利用
+        // MyBeacon "00000000-8B46-1001-B000-0001C4DBB8E3"
         //# Estimote D456894A-02F0-4CB0-8258-81C187DF45C2 受信不可。uuidが違う可能性がある。
         //# ｘBeacon E2C56DB5-DFFB-48D2-B060-D0F5A71096E0 OK。リストから選択
         //# ｘBeacon 5A4BCFCE-174E-4BAC-A814-092E77F6B7E5
@@ -56,6 +60,19 @@
 
 - (IBAction)buttonReaction:(id)sender {
     self.sendMode = YES ;
+    NSLog(@"change color");
+    self.txtview.backgroundColor = [UIColor whiteColor];
+    [self.txtview resignFirstResponder];
+}
+
+// キーボードを表示させない
+- (BOOL)textViewShouldReturn:(UITextField *)textView
+{
+    // ソフトウェアキーボードを閉じる
+    NSLog(@"close Keyboard");
+    [textView resignFirstResponder];
+ 
+    return YES;
 }
 
 #pragma mark - CLLocationManagerDelegate methods
@@ -264,7 +281,7 @@
                              bm_message_id
                              ];
     self.txtview.text = textmessage ;
-    self.sendMode = NO;
+    //self.sendMode = NO;
 
     if ( [cmd isEqualToString:@"url"]==YES )
     {
@@ -273,6 +290,11 @@
         [self urlScheme: urlscheme] ;
         // [self sendLocalNotificationForMessage:textmessage];
     }
+    else if ( [cmd isEqualToString:@"touch"]==YES )
+    {
+        self.txtview.backgroundColor = [UIColor redColor];
+    }
+
 }
 
 - (void)urlScheme:(NSString *)url

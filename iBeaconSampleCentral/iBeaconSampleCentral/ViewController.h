@@ -11,3 +11,6 @@
 @interface ViewController : UIViewController
 
 @end
+
+@interface TextViewController : UIViewController <UITextViewDelegate>
+@end

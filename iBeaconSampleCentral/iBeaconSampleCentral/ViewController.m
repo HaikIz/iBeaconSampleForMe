@@ -14,7 +14,7 @@
 @property (nonatomic) CLLocationManager *locationManager;
 @property (nonatomic) NSUUID *proximityUUID;
 @property (nonatomic) CLBeaconRegion *beaconRegion;
-@property (weak, nonatomic) IBOutlet UITextView *txtview;
+@property (strong, nonatomic) IBOutlet UITextView *txtview;
 
 // サンプルプログラム用
 @property (nonatomic) NSString *vendorUUID;       // device_id用
@@ -31,6 +31,8 @@
     // 広告トラッキング以外の用途に使用するUUID取得用メソッド
     self.vendorUUID = [[UIDevice currentDevice].identifierForVendor UUIDString];
     self.sendMode = YES ;
+    // デリゲート先を設定
+    self.txtview.delegate = self;
 
     if ([CLLocationManager isMonitoringAvailableForClass:[CLCircularRegion class]]) {
         self.locationManager = [CLLocationManager new];
@@ -55,8 +57,22 @@
 }
 
 - (IBAction)buttonReaction:(id)sender {
+    //NSLog(@"buttonReaction");
     self.sendMode = YES ;
 }
+
+
+-(BOOL) textViewShouldBeginEditing:(UITextField *)textField
+{
+//    BOOL keyboardBool
+//    if( textField == self.txtview){
+//        keyboardBool = NO;
+//    }
+    // NSLog(@"close keyboard");
+    [textField resignFirstResponder];
+    return NO;
+}
+
 
 #pragma mark - CLLocationManagerDelegate methods
 
@@ -247,6 +263,7 @@
 		}
 	}
     NSLog(@"retjson=%@¥n",data_str);
+    
     //NSString *textmessage = [NSString stringWithFormat:@"param:%@\njson:%@", mes,data_str];
     NSString *textmessage = [NSString stringWithFormat:@"recieve_time:%@\nuuid:%@\nmajor:%@\nminor:%@\nproximity:%@\nacceracy:%@\nrssi:%@\ndevinfo:%@\nmessage:%@\ncmd:%@\nparameter:%@\ndevice_id:%@\nmessage_id:%@\n",
                              recieve_time  ,
@@ -264,7 +281,7 @@
                              bm_message_id
                              ];
     self.txtview.text = textmessage ;
-    self.sendMode = NO;
+    //self.sendMode = NO;
 
     if ( [cmd isEqualToString:@"url"]==YES )
     {

@@ -12,10 +12,10 @@
 @interface ViewController () <CLLocationManagerDelegate>
 
 @property (nonatomic) CLLocationManager *locationManager;
-@property (nonatomic) NSUUID *proximityUUID;  // MyBeacon
+@property (nonatomic) NSUUID *proximityUUIDmy;  // MyBeacon
 @property (nonatomic) NSUUID *proximityUUIDx; // xBeacon
 @property (nonatomic) CLBeaconRegion *beaconRegion;
-@property (weak, nonatomic) IBOutlet UITextView *txtview;
+@property (strong, nonatomic) IBOutlet UITextView *txtview;
 
 // サンプルプログラム用
 @property (nonatomic) NSString *vendorUUID;       // device_id用 myBeacon
@@ -31,41 +31,75 @@
 
     // 広告トラッキング以外の用途に使用するUUID取得用メソッド
     self.vendorUUID = [[UIDevice currentDevice].identifierForVendor UUIDString];
-    self.sendMode = YES ;
-
-    // キーボードを表示させない
+    self.sendMode = YES ;       // YESの場合、Webサーバへデータ送信を行う
+    // デリゲート先を設定 - キーボードを表示させない
+    // ViewController.h の宣言を以下のように変更すること
+    // @interface ViewController : UIViewController <UITextViewDelegate>
+    // @end                                         ////////////////////
     self.txtview.delegate = self;
     
     if ([CLLocationManager isMonitoringAvailableForClass:[CLCircularRegion class]]) {
         self.locationManager = [CLLocationManager new];
         self.locationManager.delegate = self;
-        // iPhone/iPad App Storeのツールを利用
+
+        // Beacon UUID は，20個まで登録可能 http://qiita.com/himara2/items/1d6c11a4d4839c3027d5
         // MyBeacon "00000000-8B46-1001-B000-0001C4DBB8E3"
-        //# Estimote D456894A-02F0-4CB0-8258-81C187DF45C2 受信不可。uuidが違う可能性がある。
+        // iPhone/iPad App Storeのツールを利用
         //# ｘBeacon E2C56DB5-DFFB-48D2-B060-D0F5A71096E0 OK。リストから選択
         //# ｘBeacon 5A4BCFCE-174E-4BAC-A814-092E77F6B7E5
-/*
-        self.proximityUUID = [[NSUUID alloc] initWithUUIDString:@"00000000-8B46-1001-B000-0001C4DBB8E3"];
-        self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUID
+        //# ｘBeacon 74278BDA-B644-4250-8F0C-720EAF059935
+        //# ｘBeacon B9407F30-F5F8-466E-AFF9-25556B57FE6D
+        //# ｘBeacon 08D4A950-80F0-4D42-A14B-D53E063516E6
+        //# ｘBeacon 8492E75F-4FD6-469D-B134-043FE94921D8
+
+        self.proximityUUIDmy = [[NSUUID alloc] initWithUUIDString:@"00000000-8B46-1001-B000-0001C4DBB8E3"];
+        self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUIDmy
                                                      identifier:@"jp.co.hitachi-solutions.csv.mybeacon"];
         [self.locationManager startMonitoringForRegion:self.beaconRegion];
-*/
+ 
+        // 同じself.proximityUUIDxを使用しているが、あくまでワークとして使用している。プロパティにする必要はない
+        // サンプルを流用したためのコーディング
         self.proximityUUIDx = [[NSUUID alloc] initWithUUIDString:@"E2C56DB5-DFFB-48D2-B060-D0F5A71096E0"];
-        self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUID
-                                                     identifier:@"jp.co.hitachi-solutions.csv.xbeacon"];
+        self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUIDx
+                                                               identifier:@"jp.co.hitachi-solutions.csv.xbeacon"];
         [self.locationManager startMonitoringForRegion:self.beaconRegion];
 
-        self.txtview.text = [self.proximityUUID UUIDString];
+        self.proximityUUIDx = [[NSUUID alloc] initWithUUIDString:@"5A4BCFCE-174E-4BAC-A814-092E77F6B7E5"];
+        self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUIDx
+                                                               identifier:@"jp.co.hitachi-solutions.csv.xbeacon1"];
+        [self.locationManager startMonitoringForRegion:self.beaconRegion];
+
+        self.proximityUUIDx = [[NSUUID alloc] initWithUUIDString:@"74278BDA-B644-4520-8F0C-720EAF059935"];
+        self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUIDx
+                                                               identifier:@"jp.co.hitachi-solutions.csv.xbeacon2"];
+        [self.locationManager startMonitoringForRegion:self.beaconRegion];
+        self.proximityUUIDx = [[NSUUID alloc] initWithUUIDString:@"B9407F30-F5F8-466E-AFF9-25556B57FE6D"];
+        self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUIDx
+                                                               identifier:@"jp.co.hitachi-solutions.csv.xbeacon3"];
+        [self.locationManager startMonitoringForRegion:self.beaconRegion];
+        self.proximityUUIDx = [[NSUUID alloc] initWithUUIDString:@"08D4A950-80F0-4D42-A14B-D53E063516E6"];
+        self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUIDx
+                                                               identifier:@"jp.co.hitachi-solutions.csv.xbeacon4"];
+        [self.locationManager startMonitoringForRegion:self.beaconRegion];
+        
+        self.proximityUUIDx = [[NSUUID alloc] initWithUUIDString:@"8492E75F-4FD6-469D-B132-043FE94921D8"];
+        self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUIDx
+                                                               identifier:@"jp.co.hitachi-solutions.csv.xbeacon6"];
+        [self.locationManager startMonitoringForRegion:self.beaconRegion];
+
+        self.txtview.text = [self.proximityUUIDx UUIDString];
     }
 }
 
 - (void)didReceiveMemoryWarning
+
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
 
 - (IBAction)buttonReaction:(id)sender {
+    //NSLog(@"buttonReaction");
     self.sendMode = YES ;
     NSLog(@"change color");
     self.txtview.backgroundColor = [UIColor whiteColor];
@@ -81,6 +115,19 @@
  
     return YES;
 }
+
+
+-(BOOL) textViewShouldBeginEditing:(UITextField *)textField
+{
+//    BOOL keyboardBool
+//    if( textField == self.txtview){
+//        keyboardBool = NO;
+//    }
+    // NSLog(@"close keyboard");
+    [textField resignFirstResponder];
+    return NO;
+}
+
 
 #pragma mark - CLLocationManagerDelegate methods
 
@@ -113,6 +160,13 @@
     default:
         break;
     }
+}
+
+// 参考
+// 以下のdelegate関数は無くても動作する。
+- (void)locationManager:(CLLocationManager *)manager rangingBeaconsDidFailForRegion:(CLBeaconRegion *)region withError:(NSError *)error
+{
+    NSLog(@"%s, %@", __PRETTY_FUNCTION__, error);
 }
 // ****************************************************************
 
@@ -247,6 +301,7 @@
     NSString *parameter     = [jsonDictionary objectForKey:@"parameter"];
     NSString *device_id     = [jsonDictionary objectForKey:@"device_id"];
     NSString *bm_message_id = [jsonDictionary objectForKey:@"bm_message_id"];
+    NSString *status_code   = [jsonDictionary objectForKey:@"status_code"];
 /**************************************************************************************
  **************************************************************************************/
     //
@@ -273,8 +328,9 @@
 		}
 	}
     NSLog(@"retjson=%@¥n",data_str);
+    
     //NSString *textmessage = [NSString stringWithFormat:@"param:%@\njson:%@", mes,data_str];
-    NSString *textmessage = [NSString stringWithFormat:@"recieve_time:%@\nuuid:%@\nmajor:%@\nminor:%@\nproximity:%@\nacceracy:%@\nrssi:%@\ndevinfo:%@\nmessage:%@\ncmd:%@\nparameter:%@\ndevice_id:%@\nmessage_id:%@\n",
+    NSString *textmessage = [NSString stringWithFormat:@"recieve_time:%@\nuuid:%@\nmajor:%@\nminor:%@\nproximity:%@\nacceracy:%@\nrssi:%@\ndevinfo:%@\nmessage:%@\ncmd:%@\nparameter:%@\ndevice_id:%@\nmessage_id:%@\nstatus_code:%@",
                              recieve_time  ,
                              uuid          ,
                              major         ,
@@ -287,7 +343,8 @@
                              cmd           ,
                              parameter     ,
                              device_id     ,
-                             bm_message_id
+                             bm_message_id,
+                             status_code
                              ];
     self.txtview.text = textmessage ;
     //self.sendMode = NO;

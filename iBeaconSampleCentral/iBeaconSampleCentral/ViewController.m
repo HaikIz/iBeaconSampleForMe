@@ -12,8 +12,7 @@
 @interface ViewController () <CLLocationManagerDelegate>
 
 @property (nonatomic) CLLocationManager *locationManager;
-@property (nonatomic) NSUUID *proximityUUIDmy;  // MyBeacon
-@property (nonatomic) NSUUID *proximityUUIDx; // xBeacon
+@property (nonatomic) NSUUID *proximityUUID; // xBeacon
 @property (nonatomic) CLBeaconRegion *beaconRegion;
 @property (strong, nonatomic) IBOutlet UITextView *txtview;
 
@@ -43,8 +42,8 @@
         self.locationManager.delegate = self;
 
         // Beacon UUID は，20個まで登録可能 http://qiita.com/himara2/items/1d6c11a4d4839c3027d5
-        // MyBeacon "00000000-8B46-1001-B000-0001C4DBB8E3"
-        // iPhone/iPad App Storeのツールを利用
+        // MyBeacon "00000000-8B46-1001-B000-001C4D2BB8E3"
+        //# xBeacon iPhone/iPad App Storeのツール
         //# ｘBeacon E2C56DB5-DFFB-48D2-B060-D0F5A71096E0 OK。リストから選択
         //# ｘBeacon 5A4BCFCE-174E-4BAC-A814-092E77F6B7E5
         //# ｘBeacon 74278BDA-B644-4250-8F0C-720EAF059935
@@ -52,42 +51,50 @@
         //# ｘBeacon 08D4A950-80F0-4D42-A14B-D53E063516E6
         //# ｘBeacon 8492E75F-4FD6-469D-B134-043FE94921D8
 
-        self.proximityUUIDmy = [[NSUUID alloc] initWithUUIDString:@"00000000-8B46-1001-B000-0001C4DBB8E3"];
-        self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUIDmy
-                                                     identifier:@"jp.co.hitachi-solutions.csv.mybeacon"];
-        [self.locationManager startMonitoringForRegion:self.beaconRegion];
- 
         // 同じself.proximityUUIDxを使用しているが、あくまでワークとして使用している。プロパティにする必要はない
         // サンプルを流用したためのコーディング
-        self.proximityUUIDx = [[NSUUID alloc] initWithUUIDString:@"E2C56DB5-DFFB-48D2-B060-D0F5A71096E0"];
-        self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUIDx
+        self.proximityUUID = [[NSUUID alloc] initWithUUIDString:@"00000000-8B46-1001-B000-001C4D2BB8E3"];
+        self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUID
+                                                     identifier:@"jp.co.hitachi-solutions.csv.mybeacon"];
+        [self.locationManager startMonitoringForRegion:self.beaconRegion];
+        NSLog(@"Recieved:%@",[self.proximityUUID UUIDString]);
+/*
+        self.proximityUUID = [[NSUUID alloc] initWithUUIDString:@"E2C56DB5-DFFB-48D2-B060-D0F5A71096E0"];
+        self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUID
                                                                identifier:@"jp.co.hitachi-solutions.csv.xbeacon"];
         [self.locationManager startMonitoringForRegion:self.beaconRegion];
+        NSLog(@"Recieved:%@",[self.proximityUUID UUIDString]);
 
-        self.proximityUUIDx = [[NSUUID alloc] initWithUUIDString:@"5A4BCFCE-174E-4BAC-A814-092E77F6B7E5"];
-        self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUIDx
+        self.proximityUUID = [[NSUUID alloc] initWithUUIDString:@"5A4BCFCE-174E-4BAC-A814-092E77F6B7E5"];
+        self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUID
                                                                identifier:@"jp.co.hitachi-solutions.csv.xbeacon1"];
         [self.locationManager startMonitoringForRegion:self.beaconRegion];
+        NSLog(@"Recieved:%@",[self.proximityUUID UUIDString]);
 
-        self.proximityUUIDx = [[NSUUID alloc] initWithUUIDString:@"74278BDA-B644-4520-8F0C-720EAF059935"];
-        self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUIDx
+        self.proximityUUID = [[NSUUID alloc] initWithUUIDString:@"74278BDA-B644-4520-8F0C-720EAF059935"];
+        self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUID
                                                                identifier:@"jp.co.hitachi-solutions.csv.xbeacon2"];
         [self.locationManager startMonitoringForRegion:self.beaconRegion];
-        self.proximityUUIDx = [[NSUUID alloc] initWithUUIDString:@"B9407F30-F5F8-466E-AFF9-25556B57FE6D"];
-        self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUIDx
+        NSLog(@"Recieved:%@",[self.proximityUUID UUIDString]);
+
+        self.proximityUUID = [[NSUUID alloc] initWithUUIDString:@"B9407F30-F5F8-466E-AFF9-25556B57FE6D"];
+        self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUID
                                                                identifier:@"jp.co.hitachi-solutions.csv.xbeacon3"];
         [self.locationManager startMonitoringForRegion:self.beaconRegion];
-        self.proximityUUIDx = [[NSUUID alloc] initWithUUIDString:@"08D4A950-80F0-4D42-A14B-D53E063516E6"];
-        self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUIDx
+        NSLog(@"Recieved:%@",[self.proximityUUID UUIDString]);
+
+        self.proximityUUID = [[NSUUID alloc] initWithUUIDString:@"08D4A950-80F0-4D42-A14B-D53E063516E6"];
+        self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUID
                                                                identifier:@"jp.co.hitachi-solutions.csv.xbeacon4"];
         [self.locationManager startMonitoringForRegion:self.beaconRegion];
+        NSLog(@"Recieved:%@",[self.proximityUUID UUIDString]);
         
-        self.proximityUUIDx = [[NSUUID alloc] initWithUUIDString:@"8492E75F-4FD6-469D-B132-043FE94921D8"];
-        self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUIDx
+        self.proximityUUID = [[NSUUID alloc] initWithUUIDString:@"8492E75F-4FD6-469D-B132-043FE94921D8"];
+        self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:self.proximityUUID
                                                                identifier:@"jp.co.hitachi-solutions.csv.xbeacon6"];
         [self.locationManager startMonitoringForRegion:self.beaconRegion];
-
-        self.txtview.text = [self.proximityUUIDx UUIDString];
+*/
+        self.txtview.text = [self.proximityUUID UUIDString];
     }
 }
 
@@ -103,6 +110,7 @@
     self.sendMode = YES ;
     NSLog(@"change color");
     self.txtview.backgroundColor = [UIColor whiteColor];
+    self.txtview.text = @"Clear";
     [self.txtview resignFirstResponder];
 }
 
@@ -123,14 +131,14 @@
 //    if( textField == self.txtview){
 //        keyboardBool = NO;
 //    }
-    // NSLog(@"close keyboard");
+    NSLog(@"close keyboard");
     [textField resignFirstResponder];
     return NO;
 }
 
 
 #pragma mark - CLLocationManagerDelegate methods
-
+#if 0
 - (void)locationManager:(CLLocationManager *)manager didStartMonitoringForRegion:(CLRegion *)region
 {
 	// ****************************************************************
@@ -168,6 +176,7 @@
 {
     NSLog(@"%s, %@", __PRETTY_FUNCTION__, error);
 }
+#endif
 // ****************************************************************
 
 
@@ -301,7 +310,7 @@
     NSString *parameter     = [jsonDictionary objectForKey:@"parameter"];
     NSString *device_id     = [jsonDictionary objectForKey:@"device_id"];
     NSString *bm_message_id = [jsonDictionary objectForKey:@"bm_message_id"];
-    NSString *status_code   = [jsonDictionary objectForKey:@"status_code"];
+    NSNumber *status_id   = [jsonDictionary objectForKey:@"status_id"];
 /**************************************************************************************
  **************************************************************************************/
     //
@@ -330,7 +339,7 @@
     NSLog(@"retjson=%@¥n",data_str);
     
     //NSString *textmessage = [NSString stringWithFormat:@"param:%@\njson:%@", mes,data_str];
-    NSString *textmessage = [NSString stringWithFormat:@"recieve_time:%@\nuuid:%@\nmajor:%@\nminor:%@\nproximity:%@\nacceracy:%@\nrssi:%@\ndevinfo:%@\nmessage:%@\ncmd:%@\nparameter:%@\ndevice_id:%@\nmessage_id:%@\nstatus_code:%@",
+    NSString *textmessage = [NSString stringWithFormat:@"recieve_time:%@\nuuid:%@\nmajor:%@\nminor:%@\nproximity:%@\nacceracy:%@\nrssi:%@\ndevinfo:%@\nmessage:%@\ncmd:%@\nparameter:%@\ndevice_id:%@\nmessage_id:%@\nstatus_id:%@",
                              recieve_time  ,
                              uuid          ,
                              major         ,
@@ -344,7 +353,7 @@
                              parameter     ,
                              device_id     ,
                              bm_message_id,
-                             status_code
+                             status_id
                              ];
     self.txtview.text = textmessage ;
     //self.sendMode = NO;
@@ -360,7 +369,10 @@
     {
         self.txtview.backgroundColor = [UIColor redColor];
     }
-
+    if ( [status_id integerValue] == 1 )
+    {
+        self.txtview.backgroundColor = [UIColor yellowColor];
+    }
 }
 
 - (void)urlScheme:(NSString *)url
